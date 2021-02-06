@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" Version="32.1.1" />
     <PackageReference Include="Serilog.Sinks.LiteDB" Version="1.0.24" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Bogus;
+using Serilog;
 using System;
 
 namespace LogToDB
@@ -13,7 +14,24 @@ namespace LogToDB
                 .WriteTo.LiteDB(@$"{AppContext.BaseDirectory}\logs\applog.db", logCollectionName: "applog")
                 .CreateLogger();
 
-            log.Error("Errore");
+            var testLog = new Faker<LogData>()
+                .RuleFor(l => l.Name, t => t.Name.FirstName())
+                .RuleFor(l => l.Surname, t => t.Name.LastName())
+                .RuleFor(l => l.JobTitle, t => t.Name.JobTitle());
+
+            foreach (var item in testLog.Generate(1000))
+            {
+                log.Information("Information: {@fakeObj}", item);
+            }
+            log.Dispose();
+        }
+
+        public class LogData
+        {
+            public DateTime Date { get; set; } = DateTime.Now;
+            public string Name { get; set; }
+            public string Surname { get; set; }
+            public string JobTitle { get; set; }
         }
     }
 }
