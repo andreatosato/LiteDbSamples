@@ -21,9 +21,10 @@ namespace LiteDBSamples.ConsoleApp.DataGenerator
         public static List<Student> GenerateStudents(List<Course> courses, int numbers)
         {
             var studentGenerator = new Faker<Student>()
-                .RuleFor(s => s.StudentId, f => f.Random.AlphaNumeric(8).ToUpper())
+                .CustomInstantiator((f) => new Student(LiteDB.ObjectId.NewObjectId(), f.Random.AlphaNumeric(8).ToUpper()))
                 .RuleFor(s => s.Name, f => f.Name.FirstName())
                 .RuleFor(s => s.Surname, f => f.Name.LastName())
+                .RuleFor(s => s.Photo, f => new Uri(f.Internet.Avatar()))
                 .RuleFor(s => s.Birthday, f => f.Date.Past(18, DateTime.Now.AddYears(-100)));
             
             var students = studentGenerator.Generate(numbers);
