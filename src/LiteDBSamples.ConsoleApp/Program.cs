@@ -17,14 +17,20 @@ namespace LiteDBSamples.ConsoleApp
             CreateFile();
             Console.ForegroundColor = ConsoleColor.Green;
             BsonDocumentExample();
-            
+
             await Task.Delay(10_000);
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
 
             CreateFile();
             MapperExample();
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            await Task.Delay(10_000);
 
+
+            CreateFile();
+            FileExample();
             await Task.Delay(10_000);
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
@@ -110,6 +116,29 @@ namespace LiteDBSamples.ConsoleApp
                 stopwatch.Stop();
                 Console.WriteLine("Read: {0}", stopwatch.ElapsedMilliseconds);
                 Console.WriteLine("Read: {0}", r2);
+            }
+        }
+
+        private static void FileExample()
+        {
+            using (var db = new LiteDatabase(filePath))
+            {
+                var imageId = Guid.NewGuid();
+                Console.WriteLine($"Image id: {imageId}");
+                var storage = db.GetStorage<Guid>("FileCollection", "ChunksCollection");
+                storage.Upload(imageId, @$"{AppContext.BaseDirectory}\files\mbappe_ansa.jpg");
+                var mbappeDoc = new BsonDocument
+                {
+                    { "player_name", "Mbappe" },
+                    { "data", new DateTime(2021, 02, 27) }
+                };
+                storage.SetMetadata(imageId, mbappeDoc);
+                db.Checkpoint();
+
+                // And download later
+                var memoryStream = new MemoryStream();
+                var downloadFile = storage.Download(imageId, memoryStream);
+                Console.WriteLine($"Download info: {System.Text.Json.JsonSerializer.Serialize(downloadFile.Metadata.ToString(), new JsonSerializerOptions{ WriteIndented = true })}");
             }
         }
 
